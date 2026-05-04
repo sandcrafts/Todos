@@ -6,19 +6,19 @@ POST http://localhost:5240/todos
 content-type: application/json
 
 {
-  "id": 5,
-  "name": "Write demo",
+  "id": 6,
+  "name": "Write demo middle",
   "dueDate": "2027-12-31",
   "isCompleted": false
 }
 
 ###
 
-PUT http://localhost:5240/todos/4
+PUT http://localhost:5240/todos/5
 content-type: application/json
 
 {
-  "id": 5,
+  "id": 7,
   "name": "Write demo edit",
   "dueDate": "2023-12-31",
   "isCompleted": false
@@ -26,14 +26,14 @@ content-type: application/json
 
 ###
 
-GET http://localhost:5240/todos/4
+GET http://localhost:5240/todos/7
 
 ###
-GET http://localhost:5240/tasks/4
+GET http://localhost:5240/tasks/7
 
 ###
 
-DELETE http://localhost:5240/todos/1
+DELETE http://localhost:5240/todos/6
 
 ###
 
