@@ -46,7 +46,7 @@ jobs:
           echo "POST /todos"
           curl -sf -X POST http://localhost:5240/todos \
             -H "Content-Type: application/json" \
-            -d '{"id":4,"name":"Write demo","dueDate":"2023-12-31","isCompleted":false}'
+            -d '{"id":4,"name":"Write demo","dueDate":"2030-12-31","isCompleted":false}'
 
           # GET via the rewritten /tasks/{id} URL (-L follows the 302 redirect to /todos/4)
           echo "GET /tasks/4 (expecting redirect to /todos/4)"
