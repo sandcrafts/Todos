@@ -15,14 +15,54 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+      - name: Smoke test endpoints
+        run: |
+          # Start the server in the background
+          dotnet run --project Todos --no-build --urls "http://localhost:5240" > server.log 2>&1 &
+          SERVER_PID=$!
+
+          # Wait for the server to become responsive (up to ~30s)
+          for i in {1..30}; do
+            if curl -sf http://localhost:5240/todos > /dev/null; then
+              echo "Server is up"
+              break
+            fi
+            echo "Waiting for server... ($i)"
+            sleep 1
+          done
+
+          # POST a new todo
+          echo "POST /todos"
+          curl -sf -X POST http://localhost:5240/todos \
+            -H "Content-Type: application/json" \
+            -d '{"id":4,"name":"Write demo","dueDate":"2023-12-31","isCompleted":false}'
+
+          # GET via the rewritten /tasks/{id} URL (-L follows the 302 redirect to /todos/4)
+          echo "GET /tasks/4 (expecting redirect to /todos/4)"
+          RESPONSE=$(curl -sfL http://localhost:5240/tasks/4)
+          echo "Response: $RESPONSE"
+
+          # Verify the response contains the expected todo
+          if echo "$RESPONSE" | grep -q "Write demo"; then
+            echo "Smoke test passed"
+            STATUS=0
+          else
+            echo "Smoke test failed"
+            echo "----- server.log -----"
+            cat server.log
+            STATUS=1
+          fi
+
+          kill $SERVER_PID 2>/dev/null || true
+          exit $STATUS
